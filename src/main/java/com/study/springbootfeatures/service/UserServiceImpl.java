@@ -6,6 +6,8 @@ import com.study.springbootfeatures.exception.UserNotFoundException;
 import com.study.springbootfeatures.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private MessageSource messageSource;
+
     public UserResponseDTO save(UserRequestDTO userRequestDTO) {
         UserEntity user = modelMapper.map(userRequestDTO, UserEntity.class);
 
@@ -31,7 +36,8 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO update(UserRequestDTO userRequestDTO, Long userId) {
 
         userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(String.format("User of id: %s was not found", userId)));
+                .orElseThrow(()-> new UserNotFoundException(messageSource
+                        .getMessage("error.user.not.found", null,  LocaleContextHolder.getLocale())));
 
         UserEntity user = modelMapper.map(userRequestDTO, UserEntity.class);
         user.setId(userId);
@@ -45,7 +51,8 @@ public class UserServiceImpl implements UserService {
     public OperationStatusResponse delete(Long userId) {
 
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(String.format("User of id: %s was not found", userId)));
+                .orElseThrow(()-> new UserNotFoundException(messageSource
+                        .getMessage("error.user.not.found", null,  LocaleContextHolder.getLocale())));
 
         userRepository.delete(user);
 
@@ -60,7 +67,8 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO findById(Long userId) {
 
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(String.format("User of id: %s was not found", userId)));
+                .orElseThrow(()-> new UserNotFoundException(messageSource
+                        .getMessage("error.user.not.found", null,  LocaleContextHolder.getLocale())));
 
         return modelMapper.map(user, UserResponseDTO.class);
 
