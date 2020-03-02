@@ -2,22 +2,20 @@ package com.study.springbootfeatures.entity;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.io.Serializable;
 
 @Data
-@Entity(name = "users")
+@Entity
+@Table(name = "users")
 public class UserEntity implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+    @Column(name = "user_name", nullable = false, length = 100)
+    private String username;
 
     @Column(nullable = false, length = 100, unique = true)
     private String email;

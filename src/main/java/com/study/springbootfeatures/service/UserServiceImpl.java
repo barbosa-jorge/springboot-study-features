@@ -37,7 +37,8 @@ public class UserServiceImpl implements UserService {
 
         userRepository.findById(userId)
                 .orElseThrow(()-> new UserNotFoundException(messageSource
-                        .getMessage("error.user.not.found", null,  LocaleContextHolder.getLocale())));
+                        .getMessage("error.application.user.not.found", null,
+                                LocaleContextHolder.getLocale())));
 
         UserEntity user = modelMapper.map(userRequestDTO, UserEntity.class);
         user.setId(userId);
@@ -52,7 +53,8 @@ public class UserServiceImpl implements UserService {
 
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(()-> new UserNotFoundException(messageSource
-                        .getMessage("error.user.not.found", null,  LocaleContextHolder.getLocale())));
+                        .getMessage("error.application.user.not.found", null,
+                                LocaleContextHolder.getLocale())));
 
         userRepository.delete(user);
 
@@ -68,7 +70,8 @@ public class UserServiceImpl implements UserService {
 
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(()-> new UserNotFoundException(messageSource
-                        .getMessage("error.user.not.found", null,  LocaleContextHolder.getLocale())));
+                        .getMessage("error.application.user.not.found", null,
+                                LocaleContextHolder.getLocale())));
 
         return modelMapper.map(user, UserResponseDTO.class);
 
