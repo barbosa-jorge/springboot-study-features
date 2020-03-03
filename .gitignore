@@ -1,7 +1,5 @@
 # Intellij files
-.idea
-.idea/*.xml
-.idea/*.iml
+.idea/*
 
 # Compiled class file
 *.class
