@@ -9,8 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,8 +31,15 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private MessageSource messageSource;
 
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
     public UserResponseDTO save(UserRequestDTO userRequestDTO) {
+
         UserEntity user = modelMapper.map(userRequestDTO, UserEntity.class);
+
+        // Encrypt password
+        user.setEncryptedPassword(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()));
 
         UserEntity savedUser = userRepository.save(user);
         return modelMapper.map(savedUser, UserResponseDTO.class);
@@ -42,6 +54,9 @@ public class UserServiceImpl implements UserService {
 
         UserEntity user = modelMapper.map(userRequestDTO, UserEntity.class);
         user.setId(userId);
+
+        // Encrypt password
+        user.setEncryptedPassword(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()));
 
         UserEntity savedUser = userRepository.save(user);
 
@@ -82,5 +97,33 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll(pageable).get()
                 .map(user -> modelMapper.map(user, UserResponseDTO.class))
                 .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        UserEntity userEntity = userRepository.findByEmail(email)
+                .orElseThrow(()-> new UserNotFoundException(messageSource
+                        .getMessage("error.application.user.not.found", null,
+                                LocaleContextHolder.getLocale())));
+
+        //return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(),
+          //      //userEntity.getEmailVerificationStatus(),
+            //    true, true,
+              //  true, new ArrayList<>());
+
+        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), new ArrayList<>());
+    }
+
+    @Override
+    public UserResponseDTO getUserByEmail(String email) {
+
+        UserEntity userEntity = userRepository.findByEmail(email)
+                .orElseThrow(()-> new UserNotFoundException(messageSource
+                        .getMessage("error.application.user.not.found", null,
+                                LocaleContextHolder.getLocale())));
+
+        return modelMapper.map(userEntity, UserResponseDTO.class);
+
     }
 }

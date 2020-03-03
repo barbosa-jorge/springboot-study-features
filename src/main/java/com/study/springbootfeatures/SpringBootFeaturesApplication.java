@@ -1,5 +1,6 @@
 package com.study.springbootfeatures;
 
+import com.study.springbootfeatures.security.AppProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.MessageSource;
@@ -40,5 +41,15 @@ public class SpringBootFeaturesApplication {
 		LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
 		bean.setValidationMessageSource(messageSource());
 		return bean;
+	}
+
+	@Bean
+	public SpringApplicationContext springApplicationContext() {
+		return new SpringApplicationContext();
+	}
+
+	@Bean(name="AppProperties")
+	public AppProperties getAppProperties() {
+		return new AppProperties();
 	}
 }

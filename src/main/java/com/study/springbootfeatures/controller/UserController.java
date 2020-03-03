@@ -21,14 +21,14 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserResponseDTO> save(@Valid @RequestBody UserRequestDTO userRequestDTO) {
+    public ResponseEntity<UserResponseDTO> create(@Valid @RequestBody UserRequestDTO userRequestDTO) {
         return new ResponseEntity(userService.save(userRequestDTO), HttpStatus.CREATED);
     }
 
     @PutMapping(path = "/{user-id}")
     public ResponseEntity<UserResponseDTO> update(@Valid
-                                                  @RequestBody UserRequestDTO userRequestDTO,
-                                                  @PathVariable("user-id") Long userId) {
+                                                      @RequestBody UserRequestDTO userRequestDTO,
+                                                      @PathVariable("user-id") Long userId) {
         return new ResponseEntity(userService.update(userRequestDTO, userId), HttpStatus.OK);
     }
 
