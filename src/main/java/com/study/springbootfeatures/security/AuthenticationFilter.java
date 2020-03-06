@@ -1,14 +1,16 @@
 package com.study.springbootfeatures.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.study.springbootfeatures.SpringApplicationContext;
 import com.study.springbootfeatures.dto.UserLoginRequestDTO;
+import com.study.springbootfeatures.dto.UserResponseDTO;
+import com.study.springbootfeatures.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -53,18 +55,18 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res,
                                             FilterChain chain, Authentication auth) {
 
-        String userName = ((User) auth.getPrincipal()).getUsername();
+        String userName = ((UserPrincipal) auth.getPrincipal()).getUsername();
 
         String token = Jwts.builder()
                 .setSubject(userName)
                 .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret() )
                 .compact();
-        //UserService userService = (UserService) SpringApplicationContext.getBean("userServiceImpl");
-        //UserResponseDTO userDto = userService.getUserByEmail(userName);
+        UserService userService = (UserService) SpringApplicationContext.getBean("userServiceImpl");
+        UserResponseDTO userDto = userService.getUserByEmail(userName);
 
         res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
-        //res.addHeader("UserID", userDto.getUserId());
+        res.addHeader("UserID", userDto.getUserId());
 
     }
 

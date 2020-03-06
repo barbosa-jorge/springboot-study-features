@@ -4,18 +4,18 @@ import com.study.springbootfeatures.dto.*;
 import com.study.springbootfeatures.entity.UserEntity;
 import com.study.springbootfeatures.exception.UserNotFoundException;
 import com.study.springbootfeatures.repository.UserRepository;
+import com.study.springbootfeatures.security.UserPrincipal;
+import com.study.springbootfeatures.shared.Utils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,9 +34,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    private Utils utils;
+
     public UserResponseDTO save(UserRequestDTO userRequestDTO) {
 
         UserEntity user = modelMapper.map(userRequestDTO, UserEntity.class);
+        user.setUserId(utils.generateUserId());
 
         // Encrypt password
         user.setEncryptedPassword(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()));
@@ -45,28 +48,25 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(savedUser, UserResponseDTO.class);
     }
 
-    public UserResponseDTO update(UserRequestDTO userRequestDTO, Long userId) {
+    public UserResponseDTO update(UserRequestDTO userRequestDTO, String userId) {
 
-        userRepository.findById(userId)
+        UserEntity userEntityFound = userRepository.findByUserId(userId)
                 .orElseThrow(()-> new UserNotFoundException(messageSource
                         .getMessage("error.application.user.not.found", null,
                                 LocaleContextHolder.getLocale())));
 
-        UserEntity user = modelMapper.map(userRequestDTO, UserEntity.class);
-        user.setId(userId);
+        modelMapper.map(userRequestDTO, userEntityFound);
 
         // Encrypt password
-        user.setEncryptedPassword(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()));
+        userEntityFound.setEncryptedPassword(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()));
 
-        UserEntity savedUser = userRepository.save(user);
-
-        return modelMapper.map(savedUser, UserResponseDTO.class);
+        return modelMapper.map(userRepository.save(userEntityFound), UserResponseDTO.class);
 
     }
 
-    public OperationStatusResponse delete(Long userId) {
+    public OperationStatusResponse delete(String userId) {
 
-        UserEntity user = userRepository.findById(userId)
+        UserEntity user = userRepository.findByUserId(userId)
                 .orElseThrow(()-> new UserNotFoundException(messageSource
                         .getMessage("error.application.user.not.found", null,
                                 LocaleContextHolder.getLocale())));
@@ -81,9 +81,9 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    public UserResponseDTO findById(Long userId) {
+    public UserResponseDTO findByUserId(String userId) {
 
-        UserEntity user = userRepository.findById(userId)
+        UserEntity user = userRepository.findByUserId(userId)
                 .orElseThrow(()-> new UserNotFoundException(messageSource
                         .getMessage("error.application.user.not.found", null,
                                 LocaleContextHolder.getLocale())));
@@ -107,12 +107,8 @@ public class UserServiceImpl implements UserService {
                         .getMessage("error.application.user.not.found", null,
                                 LocaleContextHolder.getLocale())));
 
-        //return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(),
-          //      //userEntity.getEmailVerificationStatus(),
-            //    true, true,
-              //  true, new ArrayList<>());
+        return new UserPrincipal(userEntity);
 
-        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), new ArrayList<>());
     }
 
     @Override

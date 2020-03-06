@@ -10,9 +10,9 @@ import java.util.List;
 
 public interface UserService extends UserDetailsService {
     UserResponseDTO save(UserRequestDTO userRequestDTO);
-    UserResponseDTO update(UserRequestDTO userRequestDTO, Long userId);
-    OperationStatusResponse delete(Long userId);
-    UserResponseDTO findById(Long userId);
+    UserResponseDTO update(UserRequestDTO userRequestDTO, String userId);
+    OperationStatusResponse delete(String userId);
     List<UserResponseDTO> findAll(Pageable pageable);
     UserResponseDTO getUserByEmail(String email);
+    UserResponseDTO findByUserId(String userId);
 }
